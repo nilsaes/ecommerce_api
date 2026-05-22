@@ -73,3 +73,35 @@ class OrderItem(models.Model):
 
     def __str__(self):
         return f"{self.quantity} x {self.product_variant} en Orden {self.order.id}"
+    
+    class Coupon(models.Model):
+    code = models.CharField(max_length=50, unique=True)
+    discount_amount = models.DecimalField(max_digits=10, decimal_places=2, help_text="Monto fijo de descuento")
+    active = models.BooleanField(default=True)
+    valid_from = models.DateTimeField()
+    valid_to = models.DateTimeField()
+
+    def __str__(self):
+        return f"Cupón: {self.code} (-{self.discount_amount})"
+
+class Payment(models.Model):
+    PAYMENT_METHODS = [
+        ('MERCADOPAGO', 'MercadoPago Paraguay'),
+        ('STRIPE', 'Stripe'),
+        ('CASH', 'Efectivo / Transferencia Bancaria'),
+    ]
+    
+    PAYMENT_STATUS = [
+        ('PENDING', 'Pendiente'),
+        ('APPROVED', 'Aprobado'),
+        ('FAILED', 'Fallido'),
+    ]
+
+    order = models.OneToOneField(Order, on_delete=models.CASCADE, related_name='payment')
+    method = models.CharField(max_length=30, choices=PAYMENT_METHODS)
+    status = models.CharField(max_length=20, choices=PAYMENT_STATUS, default='PENDING')
+    transaction_id = models.CharField(max_length=255, blank=True, null=True, help_text="ID que devuelve MercadoPago/Stripe")
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Pago Orden {self.order.id} - Estado: {self.status}"
