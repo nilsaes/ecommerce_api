@@ -27,3 +27,24 @@ class ProductVariant(models.Model):
 
     def __str__(self):
         return f"{self.product.name} - {self.size} / {self.color}"
+    
+    class Cart(models.Model):
+    # Por ahora lo dejamos simple. Más adelante lo vincularemos con el usuario si el profesor lo pide.
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"Carrito Nro: {self.id}"
+
+class CartItem(models.Model):
+    cart = models.ForeignKey(Cart, on_delete=models.CASCADE, related_name='items')
+    product_variant = models.ForeignKey(ProductVariant, on_delete=models.CASCADE)
+    quantity = models.PositiveIntegerField(default=1)
+
+    def __str__(self):
+        return f"{self.quantity} x {self.product_variant}"
+    
+    @property
+    def total_price(self):
+        # Multiplica la cantidad por el precio de la variante elegida
+        return self.quantity * self.product_variant.price
