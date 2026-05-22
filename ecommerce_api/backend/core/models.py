@@ -48,3 +48,28 @@ class CartItem(models.Model):
     def total_price(self):
         # Multiplica la cantidad por el precio de la variante elegida
         return self.quantity * self.product_variant.price
+    
+    class Order(models.Model):
+    STATUS_CHOICES = [
+        ('PENDING', 'Pendiente de Pago'),
+        ('PAID', 'Pagado'),
+        ('SHIPPED', 'Enviado'),
+        ('CANCELLED', 'Cancelado'),
+    ]
+
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='PENDING')
+    total_amount = models.DecimalField(max_digits=12, decimal_places=2, default=0.00) # Preparado para Guaraníes también
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"Orden Nro: {self.id} - Estado: {self.get_status_display()}"
+
+class OrderItem(models.Model):
+    order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name='items')
+    product_variant = models.ForeignKey(ProductVariant, on_delete=models.SET_NULL, null=True)
+    quantity = models.PositiveIntegerField(default=1)
+    price_at_purchase = models.DecimalField(max_digits=12, decimal_places=2) # El precio congelado al momento de comprar
+
+    def __str__(self):
+        return f"{self.quantity} x {self.product_variant} en Orden {self.order.id}"
