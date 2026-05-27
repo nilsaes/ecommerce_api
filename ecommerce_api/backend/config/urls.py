@@ -13,4 +13,5 @@ urlpatterns = [
     
     # Conectamos las rutas del enrutador a la URL de nuestra API
     path('api/', include(router.urls)),
+    path('api/cart/', include('cart.urls')),
 ]
