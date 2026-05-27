@@ -18,6 +18,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'core',
     'cart',  # <-- Agregamos nuestra nueva app acá
+    'users', # <-- La agregamos acá
 ]
 
 MIDDLEWARE = [
