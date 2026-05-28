@@ -19,6 +19,7 @@ INSTALLED_APPS = [
     'core',
     'cart',  # <-- Agregamos nuestra nueva app acá
     'users', # <-- La agregamos acá
+    'orders', # <-- Agregamos la app de órdenes acá
 ]
 
 MIDDLEWARE = [
