@@ -79,3 +79,95 @@ function agregarAlCarrito(productoId) {
     const varianteSeleccionada = select ? select.value : 'Ninguna';
     alert(`¡Remera añadida! ID Producto: ${productoId}, ID Variante: ${varianteSeleccionada}. (Pronto la conectaremos al carrito real)`);
 }
+
+// URL para obtener el Token JWT que configuraste en Django
+const LOGIN_URL = 'http://127.0.0.1:8000/api/token/';
+
+document.addEventListener('DOMContentLoaded', () => {
+    cargarProductos();
+    
+    // Escuchamos cuando el usuario envía el formulario de login
+    const formLogin = document.getElementById('form-login');
+    if (formLogin) {
+        formLogin.addEventListener('submit', ejecutarLogin);
+    }
+
+    // Verificamos si ya hay una sesión activa al cargar la página
+    verificarSesion();
+});
+
+// Función para procesar el inicio de sesión
+async function ejecutarLogin(e) {
+    e.preventDefault(); // Evitamos que la página se recargue
+
+    const usernameInput = document.getElementById('login-username').value;
+    const passwordInput = document.getElementById('login-password').value;
+    const errorDiv = document.getElementById('login-error');
+
+    errorDiv.classList.add('d-none'); // Ocultamos errores anteriores
+
+    try {
+        const response = await fetch(LOGIN_URL, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                username: usernameInput,
+                password: passwordInput
+            })
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            // Si Django nos rebota, mostramos el error
+            throw new Error(data.detail || 'Usuario o contraseña incorrectos.');
+        }
+
+        // ¡Éxito! Guardamos los tokens en el navegador
+        localStorage.setItem('token_access', data.access);
+        localStorage.setItem('token_refresh', data.refresh);
+        localStorage.setItem('username', usernameInput);
+
+        // Cerramos la ventana flotante (Modal) de Bootstrap de forma limpia
+        const modalElement = document.getElementById('loginModal');
+        const modal = bootstrap.Modal.getInstance(modalElement);
+        modal.hide();
+
+        // Actualizamos la barra de navegación para darle la bienvenida
+        verificarSesion();
+        alert(`¡Bienvenido de vuelta, ${usernameInput}!`);
+
+    } catch (error) {
+        errorDiv.innerText = error.message;
+        errorDiv.classList.remove('d-none'); // Mostramos el cartel rojo de error
+    }
+}
+
+// Función para comprobar si el usuario está logueado y cambiar los botones
+function verificarSesion() {
+    const username = localStorage.getItem('username');
+    const btnLogin = document.getElementById('btn-login');
+
+    if (username && btnLogin) {
+        // Si está logueado, transformamos el botón de login en su nombre y un botón de salir
+        btnLogin.outerHTML = `
+            <div class="dropdown" id="user-menu">
+                <button class="btn btn-violeta px-4 rounded-pill dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    👤 ${username}
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end shadow">
+                    <li><a class="dropdown-item text-danger" href="#" onclick="cerrarSesion()">Cerrar Sesión</a></li>
+                </ul>
+            </div>
+        `;
+    }
+}
+
+// Función para limpiar los tokens y cerrar sesión
+function cerrarSesion() {
+    localStorage.clear(); // Borra todo lo guardado
+    alert('Sesión cerrada correctamente.');
+    location.reload(); // Recargamos la página para restaurar los botones originales
+}
