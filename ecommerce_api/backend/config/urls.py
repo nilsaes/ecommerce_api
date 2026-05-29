@@ -7,11 +7,13 @@ from rest_framework_simplejwt.views import (
 )
 from users.views import RegisterView
 from core.views import ProductViewSet, CategoryViewSet
+from orders.views import OrderViewSet
 
 # Router para ViewSets
 router = DefaultRouter()
 router.register(r'products', ProductViewSet, basename='product')
 router.register(r'categories', CategoryViewSet, basename='category')
+router.register(r'orders', OrderViewSet, basename='order')
 
 urlpatterns = [
     path('admin/', admin.site.urls),
