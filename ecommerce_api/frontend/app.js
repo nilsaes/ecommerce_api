@@ -3,7 +3,8 @@
 // ==========================================
 const API_URL = 'http://127.0.0.1:8000/api/products/';
 const LOGIN_URL = 'http://127.0.0.1:8000/api/token/';
-const CARRITO_URL = 'http://127.0.0.1:8000/api/cart/';
+const CARRITO_URL = 'http://127.0.0.1:8000/api/cart/my-cart/';
+const CART_ADD_URL = 'http://127.0.0.1:8000/api/cart/my-cart/add-item/';
 
 // ==========================================
 // EVENTO PRINCIPAL: CARGA DE LA PÁGINA
@@ -114,19 +115,24 @@ async function agregarAlCarrito(productoId) {
     }
 
     try {
-        const response = await fetch(`${CARRITO_URL}add_item/`, {
+
+
+        const response = await fetch(CART_ADD_URL, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${token}`
             },
             body: JSON.stringify({
-                product_variant_id: parseInt(varianteId),
+                product_variant: parseInt(varianteId),
                 quantity: 1
             })
         });
 
-        const data = await response.json();
+        const contentType = response.headers.get('content-type') || '';
+        const data = contentType.includes('application/json')
+            ? await response.json()
+            : { detail: await response.text() };
 
         if (!response.ok) {
             throw new Error(data.detail || 'No se pudo agregar el producto al carrito.');
@@ -151,8 +157,11 @@ async function actualizarContadorCarrito() {
             headers: { 'Authorization': `Bearer ${token}` }
         });
         if (response.ok) {
-            const carrito = await response.json();
-            const totalItems = carrito.items ? carrito.items.reduce((sum, item) => sum + item.quantity, 0) : 0;
+            const contentType = response.headers.get('content-type') || '';
+            const carrito = contentType.includes('application/json')
+                ? await response.json()
+                : null;
+            const totalItems = carrito && carrito.items ? carrito.items.reduce((sum, item) => sum + item.quantity, 0) : 0;
             document.getElementById('carrito-contador').innerText = totalItems;
         }
     } catch (error) {
