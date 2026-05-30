@@ -57,7 +57,7 @@
                 <button class="btn btn-outline-light px-4 rounded-pill" id="btn-login" data-bs-toggle="modal" data-bs-target="#loginModal">
                     👤 Iniciar Sesión
                 </button>
-                <button class="btn btn-outline-light position-relative px-4 rounded-pill" id="btn-carrito">
+                <button class="btn btn-outline-light position-relative px-4 rounded-pill" id="btn-carrito" data-bs-toggle="modal" data-bs-target="#carritoModal">
                     🛒 Carrito
                     <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" id="carrito-contador">
                         0
@@ -93,6 +93,42 @@
                         </div>
                         <button type="submit" class="btn btn-violeta w-100 py-2 rounded-pill fw-bold mt-2">Ingresar a la Tienda</button>
                     </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="carritoModal" tabindex="-1" aria-labelledby="carritoModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content border-0 shadow-lg" style="border-radius: 15px;">
+                <div class="modal-header bg-violeta-nav text-white" style="border-top-left-radius: 15px; border-top-right-radius: 15px;">
+                    <h5 class="modal-title fw-bold" id="carritoModalLabel">🛒 Tu Carrito de Compras</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Producto</th>
+                                    <th>Variante</th>
+                                    <th class="text-center">Cantidad</th>
+                                    <th class="text-end">Precio</th>
+                                    <th class="text-end">Total</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tabla-carrito-cuerpo">
+                                </tbody>
+                        </table>
+                    </div>
+                    
+                    <div class="d-flex justify-content-end mt-3 mb-2">
+                        <h4 class="fw-bold" style="color: var(--violeta-oscuro);">Total: <span id="carrito-total-pago">₲0</span></h4>
+                    </div>
+                </div>
+                <div class="modal-footer border-top-0 p-3">
+                    <button type="button" class="btn btn-secondary rounded-pill px-4" data-bs-dismiss="modal">Seguir Mirando</button>
+                    <button type="button" class="btn btn-violeta rounded-pill px-4 fw-bold" id="btn-checkout" onclick="procesarCompra()">Confirmar Compra 🚀</button>
                 </div>
             </div>
         </div>

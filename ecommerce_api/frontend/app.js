@@ -6,9 +6,7 @@ const LOGIN_URL = 'http://127.0.0.1:8000/api/token/';
 const CARRITO_URL = 'http://127.0.0.1:8000/api/cart/my-cart/';
 const CART_ADD_URL = 'http://127.0.0.1:8000/api/cart/my-cart/add-item/';
 
-// ==========================================
-// EVENTO PRINCIPAL: CARGA DE LA PÁGINA
-// ==========================================
+
 document.addEventListener('DOMContentLoaded', () => {
     // 1. Cargamos los productos desde la base de datos
     cargarProductos();
@@ -19,7 +17,13 @@ document.addEventListener('DOMContentLoaded', () => {
         formLogin.addEventListener('submit', ejecutarLogin);
     }
 
-    // 3. Verificamos si ya hay una sesión activa de antes
+    // 3. Escuchamos cuando se abre el modal del carrito para cargar los datos frescos
+    const carritoModalElement = document.getElementById('carritoModal');
+    if (carritoModalElement) {
+        carritoModalElement.addEventListener('show.bs.modal', mostrarDetalleCarrito);
+    }
+
+    // 4. Verificamos si ya hay una sesión activa de antes
     verificarSesion();
 });
 
@@ -139,7 +143,11 @@ async function agregarAlCarrito(productoId) {
         }
 
         alert('¡Excelente elección! La remera se agregó a tu carrito con éxito. 👕✨');
-        actualizarContadorCarrito();
+        await actualizarContadorCarrito();
+
+        const carritoModal = bootstrap.Modal.getOrCreateInstance(document.getElementById('carritoModal'));
+        carritoModal.show();
+        await mostrarDetalleCarrito();
 
     } catch (error) {
         console.error('Error en el carrito:', error);
@@ -158,9 +166,14 @@ async function actualizarContadorCarrito() {
         });
         if (response.ok) {
             const contentType = response.headers.get('content-type') || '';
-            const carrito = contentType.includes('application/json')
+            let carrito = contentType.includes('application/json')
                 ? await response.json()
                 : null;
+
+            if (Array.isArray(carrito)) {
+                carrito = carrito[0] || null;
+            }
+
             const totalItems = carrito && carrito.items ? carrito.items.reduce((sum, item) => sum + item.quantity, 0) : 0;
             document.getElementById('carrito-contador').innerText = totalItems;
         }
@@ -244,4 +257,77 @@ function cerrarSesion() {
     localStorage.clear(); 
     alert('Sesión cerrada correctamente.');
     location.reload(); 
+}
+// Función para pintar el detalle completo del carrito dentro de la tabla modal
+async function mostrarDetalleCarrito() {
+    const token = localStorage.getItem('token_access');
+    const tbody = document.getElementById('tabla-carrito-cuerpo');
+    const totalSpan = document.getElementById('carrito-total-pago');
+
+    if (!token) {
+        tbody.innerHTML = '<tr><td colspan="5" class="text-center text-danger fw-bold">Debes iniciar sesión para ver tu carrito.</td></tr>';
+        totalSpan.innerText = '₲0';
+        return;
+    }
+
+    tbody.innerHTML = '<tr><td colspan="5" class="text-center"><div class="spinner-border text-primary" role="status"></div> Cargando...</td></tr>';
+
+    try {
+        const response = await fetch(CARRITO_URL, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+
+        if (!response.ok) throw new Error('No se pudo obtener el detalle del carrito.');
+
+        let carrito = await response.json();
+        if (Array.isArray(carrito)) {
+            carrito = carrito[0] || { items: [] };
+        }
+        tbody.innerHTML = ''; // Limpiamos el cargando
+
+        if (!carrito.items || carrito.items.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="5" class="text-center text-muted py-4">Tu carrito está vacío. ¡Agrega algunas remeras! 👕</td></tr>';
+            totalSpan.innerText = '₲0';
+            return;
+        }
+
+        let granTotal = 0;
+
+        // Recorremos los ítems que nos devolvió Django
+        carrito.items.forEach(item => {
+            const precioItem = parseFloat(item.price);
+            const subtotalItem = precioItem * item.quantity;
+            granTotal += subtotalItem;
+
+            const fila = document.createElement('tr');
+            fila.innerHTML = `
+                <td>
+                    <div class="fw-bold text-dark">${item.product_name}</div>
+                </td>
+                <td>
+                    <span class="badge bg-violeta-nav text-white">${item.size} / ${item.color}</span>
+                </td>
+                <td class="text-center fw-bold">${item.quantity}</td>
+                <td class="text-end">₲${precioItem.toLocaleString('es-PY')}</td>
+                <td class="text-end fw-bold text-dark">₲${subtotalItem.toLocaleString('es-PY')}</td>
+            `;
+            tbody.appendChild(fila);
+        });
+
+        // Actualizamos el precio final formateado a Guaraníes
+        totalSpan.innerText = `₲${granTotal.toLocaleString('es-PY')}`;
+
+    } catch (error) {
+        console.error('Error al mostrar carrito:', error);
+        tbody.innerHTML = '<tr><td colspan="5" class="text-center text-danger">Error al conectar con el servidor.</td></tr>';
+    }
+}
+
+// Función provisional para el botón de Confirmar Compra
+function procesarCompra() {
+    alert('¡Felicidades! Tu orden de compra ha sido procesada con éxito en el sistema. Tu stock ha sido actualizado. 🛍️🎉');
+    // Aquí conectaremos luego con tu endpoint de órdenes / checkout
+    const modalElement = document.getElementById('carritoModal');
+    const modal = bootstrap.Modal.getInstance(modalElement);
+    modal.hide();
 }
