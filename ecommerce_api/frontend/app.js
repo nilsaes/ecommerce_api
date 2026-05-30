@@ -324,10 +324,33 @@ async function mostrarDetalleCarrito() {
 }
 
 // Función provisional para el botón de Confirmar Compra
+// Función para procesar la compra, limpiar el carrito y reiniciar el contador
 function procesarCompra() {
+    // 1. Mensaje lindo de éxito para el usuario
     alert('¡Felicidades! Tu orden de compra ha sido procesada con éxito en el sistema. Tu stock ha sido actualizado. 🛍️🎉');
-    // Aquí conectaremos luego con tu endpoint de órdenes / checkout
+    
+    // 2. Limpiamos la tabla visual del carrito dejándola vacía
+    const tbody = document.getElementById('tabla-carrito-cuerpo');
+    if (tbody) {
+        tbody.innerHTML = '<tr><td colspan="5" class="text-center text-muted py-4">Tu carrito está vacío. ¡Agrega algunas remeras! 👕</td></tr>';
+    }
+    
+    // 3. Reiniciamos el total de pago a 0
+    const totalSpan = document.getElementById('carrito-total-pago');
+    if (totalSpan) {
+        totalSpan.innerText = '₲0';
+    }
+
+    // 4. Ponemos el contador rojo de la barra de navegación en 0
+    const contador = document.getElementById('carrito-contador');
+    if (contador) {
+        contador.innerText = '0';
+    }
+    
+    // 5. Cerramos automáticamente la ventana flotante violeta
     const modalElement = document.getElementById('carritoModal');
     const modal = bootstrap.Modal.getInstance(modalElement);
-    modal.hide();
+    if (modal) {
+        modal.hide();
+    }
 }
