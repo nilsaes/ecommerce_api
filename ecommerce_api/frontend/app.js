@@ -1,18 +1,36 @@
-// La URL de tu API de Django (el endpoint de productos que armaste)
+// ==========================================
+// CONFIGURACIÓN DE URLS DE LA API DE DJANGO
+// ==========================================
 const API_URL = 'http://127.0.0.1:8000/api/products/';
+const LOGIN_URL = 'http://127.0.0.1:8000/api/token/';
+const CARRITO_URL = 'http://127.0.0.1:8000/api/cart/';
 
-// Esperamos a que la página cargue por completo
+// ==========================================
+// EVENTO PRINCIPAL: CARGA DE LA PÁGINA
+// ==========================================
 document.addEventListener('DOMContentLoaded', () => {
+    // 1. Cargamos los productos desde la base de datos
     cargarProductos();
+    
+    // 2. Escuchamos cuando el usuario envía el formulario de login
+    const formLogin = document.getElementById('form-login');
+    if (formLogin) {
+        formLogin.addEventListener('submit', ejecutarLogin);
+    }
+
+    // 3. Verificamos si ya hay una sesión activa de antes
+    verificarSesion();
 });
+
+// ==========================================
+// MÓDULO DE PRODUCTOS
+// ==========================================
 
 // Función para traer los productos desde el Backend
 async function cargarProductos() {
     try {
-        // Hacemos la petición a Django
         const response = await fetch(API_URL);
         
-        // Si la respuesta no es correcta, lanzamos un error
         if (!response.ok) {
             throw new Error('Error al conectar con la API');
         }
@@ -33,37 +51,35 @@ async function cargarProductos() {
 // Función para pintar las remeras en el HTML de forma dinámica
 function dibujarProductos(productos) {
     const contenedor = document.getElementById('contenedor-productos');
-    contenedor.innerHTML = ''; // Limpiamos por si hay algo
+    contenedor.innerHTML = ''; 
 
     if (productos.length === 0) {
         contenedor.innerHTML = '<p class="text-center w-100">No hay productos disponibles en este momento.</p>';
         return;
     }
 
-    // Recorremos cada producto que nos devolvió Django
     productos.forEach(producto => {
-        // Creamos una tarjeta de Bootstrap para cada uno
         const tarjeta = document.createElement('div');
         tarjeta.className = 'col';
         tarjeta.innerHTML = `
-            <div class="card h-100 shadow-sm">
+            <div class="card h-100 shadow-sm card-producto">
                 <img src="https://images.unsplash.com/photo-1521572267360-ee0c2909d518?w=500" class="card-img-top" alt="${producto.name}" style="height: 250px; object-fit: cover;">
                 <div class="card-body">
-                    <h5 class="card-title">${producto.name}</h5>
-                    <p class="card-text text-muted">${producto.description || 'Sin descripción disponible.'}</p>
+                    <h5 class="card-title fw-bold" style="color: var(--violeta-oscuro);">${producto.name}</h5>
+                    <p class="card-text text-muted small">${producto.description || 'Sin descripción disponible.'}</p>
                     
                     <div class="mb-3">
                         <small class="text-dark fw-bold">Variantes disponibles:</small><br>
                         <select class="form-select form-select-sm mt-1" id="select-variante-${producto.id}">
                             ${producto.variants && producto.variants.length > 0 
                                 ? producto.variants.map(v => `<option value="${v.id}">${v.size} / ${v.color} - ₲${parseFloat(v.price).toLocaleString('es-PY')}</option>`).join('')
-                                : '<option disabled>Sin stock</option>'
+                                : '<option disabled selected>Sin stock disponible</option>'
                             }
                         </select>
                     </div>
                 </div>
                 <div class="card-footer bg-white border-top-0 pb-3">
-                    <button class="btn btn-dark w-100" onclick="agregarAlCarrito(${producto.id})">
+                    <button class="btn btn-violeta w-100 rounded-pill fw-bold" onclick="agregarAlCarrito(${producto.id})">
                         Agregar al Carrito
                     </button>
                 </div>
@@ -73,45 +89,95 @@ function dibujarProductos(productos) {
     });
 }
 
-// Función provisional para el botón (la completaremos más adelante)
-function agregarAlCarrito(productoId) {
+// ==========================================
+// MÓDULO DEL CARRITO DE COMPRAS
+// ==========================================
+
+// Función para añadir la variante elegida al carrito en el backend
+async function agregarAlCarrito(productoId) {
     const select = document.getElementById(`select-variante-${productoId}`);
-    const varianteSeleccionada = select ? select.value : 'Ninguna';
-    alert(`¡Remera añadida! ID Producto: ${productoId}, ID Variante: ${varianteSeleccionada}. (Pronto la conectaremos al carrito real)`);
-}
-
-// URL para obtener el Token JWT que configuraste en Django
-const LOGIN_URL = 'http://127.0.0.1:8000/api/token/';
-
-document.addEventListener('DOMContentLoaded', () => {
-    cargarProductos();
     
-    // Escuchamos cuando el usuario envía el formulario de login
-    const formLogin = document.getElementById('form-login');
-    if (formLogin) {
-        formLogin.addEventListener('submit', ejecutarLogin);
+    if (!select || !select.value) {
+        alert('Por favor, selecciona una variante válida antes de agregar.');
+        return;
     }
 
-    // Verificamos si ya hay una sesión activa al cargar la página
-    verificarSesion();
-});
+    const varianteId = select.value;
+    const token = localStorage.getItem('token_access');
 
-// Función para procesar el inicio de sesión
+    // Control de seguridad: Obligatorio estar logueado
+    if (!token) {
+        alert('¡Atención! Debes iniciar sesión para poder agregar productos al carrito.');
+        const loginModal = new bootstrap.Modal(document.getElementById('loginModal'));
+        loginModal.show();
+        return;
+    }
+
+    try {
+        const response = await fetch(`${CARRITO_URL}add_item/`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({
+                product_variant_id: parseInt(varianteId),
+                quantity: 1
+            })
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            throw new Error(data.detail || 'No se pudo agregar el producto al carrito.');
+        }
+
+        alert('¡Excelente elección! La remera se agregó a tu carrito con éxito. 👕✨');
+        actualizarContadorCarrito();
+
+    } catch (error) {
+        console.error('Error en el carrito:', error);
+        alert(error.message);
+    }
+}
+
+// Función para actualizar el contador rojo del carrito en la barra de navegación
+async function actualizarContadorCarrito() {
+    const token = localStorage.getItem('token_access');
+    if (!token) return;
+
+    try {
+        const response = await fetch(CARRITO_URL, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (response.ok) {
+            const carrito = await response.json();
+            const totalItems = carrito.items ? carrito.items.reduce((sum, item) => sum + item.quantity, 0) : 0;
+            document.getElementById('carrito-contador').innerText = totalItems;
+        }
+    } catch (error) {
+        console.error('Error al actualizar contador:', error);
+    }
+}
+
+// ==========================================
+// MÓDULO DE AUTENTICACIÓN (LOGIN & LOGOUT)
+// ==========================================
+
+// Función para enviar las credenciales a Django y recibir los tokens JWT
 async function ejecutarLogin(e) {
-    e.preventDefault(); // Evitamos que la página se recargue
+    e.preventDefault(); 
 
     const usernameInput = document.getElementById('login-username').value;
     const passwordInput = document.getElementById('login-password').value;
     const errorDiv = document.getElementById('login-error');
 
-    errorDiv.classList.add('d-none'); // Ocultamos errores anteriores
+    errorDiv.classList.add('d-none'); 
 
     try {
         const response = await fetch(LOGIN_URL, {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 username: usernameInput,
                 password: passwordInput
@@ -121,37 +187,35 @@ async function ejecutarLogin(e) {
         const data = await response.json();
 
         if (!response.ok) {
-            // Si Django nos rebota, mostramos el error
             throw new Error(data.detail || 'Usuario o contraseña incorrectos.');
         }
 
-        // ¡Éxito! Guardamos los tokens en el navegador
+        // Guardamos todo en el navegador
         localStorage.setItem('token_access', data.access);
         localStorage.setItem('token_refresh', data.refresh);
         localStorage.setItem('username', usernameInput);
 
-        // Cerramos la ventana flotante (Modal) de Bootstrap de forma limpia
+        // Cerramos el modal flotante
         const modalElement = document.getElementById('loginModal');
         const modal = bootstrap.Modal.getInstance(modalElement);
         modal.hide();
 
-        // Actualizamos la barra de navegación para darle la bienvenida
+        // Actualizamos la sesión en pantalla
         verificarSesion();
         alert(`¡Bienvenido de vuelta, ${usernameInput}!`);
 
     } catch (error) {
         errorDiv.innerText = error.message;
-        errorDiv.classList.remove('d-none'); // Mostramos el cartel rojo de error
+        errorDiv.classList.remove('d-none'); 
     }
 }
 
-// Función para comprobar si el usuario está logueado y cambiar los botones
+// Función para chequear el estado del usuario y pintar su nombre
 function verificarSesion() {
     const username = localStorage.getItem('username');
     const btnLogin = document.getElementById('btn-login');
 
     if (username && btnLogin) {
-        // Si está logueado, transformamos el botón de login en su nombre y un botón de salir
         btnLogin.outerHTML = `
             <div class="dropdown" id="user-menu">
                 <button class="btn btn-violeta px-4 rounded-pill dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
@@ -162,12 +226,13 @@ function verificarSesion() {
                 </ul>
             </div>
         `;
+        actualizarContadorCarrito(); 
     }
 }
 
-// Función para limpiar los tokens y cerrar sesión
+// Función para borrar datos del navegador y limpiar la pantalla
 function cerrarSesion() {
-    localStorage.clear(); // Borra todo lo guardado
+    localStorage.clear(); 
     alert('Sesión cerrada correctamente.');
-    location.reload(); // Recargamos la página para restaurar los botones originales
+    location.reload(); 
 }
