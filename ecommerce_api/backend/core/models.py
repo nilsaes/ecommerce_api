@@ -24,7 +24,7 @@ class ProductVariant(models.Model):
     size = models.CharField(max_length=50)   # Talla (ej: M, L, XL)
     color = models.CharField(max_length=50)  # Color (ej: Negro, Blanco)
     price = models.DecimalField(max_length=10, decimal_places=2, max_digits=10) # Precio específico de la variante
-    stock = models.PositiveIntegerField(default=0) # Stock disponible de esta variante
+    stock = models.PositiveIntegerField(default=9999) # Stock disponible de esta variante
 
     def __str__(self):
         return f"{self.product.name} - {self.size} / {self.color}"
