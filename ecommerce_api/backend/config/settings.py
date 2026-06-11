@@ -16,7 +16,7 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     'rest_framework',
-    'corsheaders',
+    'corsheaders',  # <--- AGREGÁ ESTA LÍNEA
     'core',
     'cart',  # <-- Agregamos nuestra nueva app acá
     'users', # <-- La agregamos acá
