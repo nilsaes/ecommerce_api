@@ -11,7 +11,8 @@ class CartViewSet(viewsets.ModelViewSet):
     serializer_class = CartSerializer
 
     def get_queryset(self):
-        # Retorna el carrito únicamente del usuario logueado
+        if self.request.user.is_anonymous:
+            return Cart.objects.none()
         return Cart.objects.filter(user=self.request.user)
 
     def create(self, request, *args, **kwargs):
