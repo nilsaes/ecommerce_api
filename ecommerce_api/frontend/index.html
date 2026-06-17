@@ -3,95 +3,164 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mi E-commerce de Remeras</title>
+    <title>UrbanVibe // Tienda de Remeras Premium</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     
     <style>
         :root {
-            --violeta-oscuro: #311042;
-            --violeta-principal: #6f42c1;
-            --violeta-claro: #f3e8ff;
+            --dark-violet: #1e0a2b;
+            --main-violet: #6f42c1;
+            --accent-glow: #00f2fe;
+            --light-bg: #f8f9fa;
         }
-        
-        /* Barra de navegación personalizada */
-        .bg-violeta-nav {
-            background-color: var(--violeta-oscuro) !important;
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: var(--light-bg);
+            color: #2d3748;
         }
-        
-        /* Botones principales */
-        .btn-violeta {
-            background-color: var(--violeta-principal);
+
+        /* Navbar Ultra-Moderna */
+        .navbar-premium {
+            background: rgba(30, 10, 43, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 2px solid rgba(111, 66, 193, 0.2);
+        }
+
+        /* Banner de Bienvenida (Hero Section) */
+        .hero-section {
+            background: linear-gradient(135deg, var(--dark-violet) 0%, #4c1d6f 100%);
+            color: white;
+            padding: 80px 0;
+            border-radius: 0 0 40px 40px;
+            box-shadow: 0 20px 40px rgba(49, 16, 66, 0.15);
+            margin-bottom: 60px;
+        }
+
+        /* Tarjetas de Productos Premium */
+        .card-producto-premium {
+            border: none;
+            border-radius: 20px;
+            background: #ffffff;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.04);
+            transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+            overflow: hidden;
+            position: relative;
+        }
+
+        .card-producto-premium:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 40px rgba(111, 66, 193, 0.15);
+        }
+
+        .product-image-wrapper {
+            position: relative;
+            background-color: #f3f4f6;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 280px;
+        }
+
+        .product-image-wrapper img {
+            transition: transform 0.5s ease;
+            max-height: 100%;
+            object-fit: cover;
+        }
+
+        .card-producto-premium:hover .product-image-wrapper img {
+            transform: scale(1.08);
+        }
+
+        /* Botones de Estilo */
+        .btn-premium-violet {
+            background: linear-gradient(135deg, var(--main-violet) 0%, #52279c 100%);
             color: white;
             border: none;
-            transition: background 0.3s ease;
+            border-radius: 12px;
+            font-weight: 600;
+            padding: 10px 20px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(111, 66, 193, 0.3);
         }
-        .btn-violeta:hover {
-            background-color: #5a32a3;
+
+        .btn-premium-violet:hover {
+            background: linear-gradient(135deg, #52279c 0%, #3b1973 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(111, 66, 193, 0.4);
             color: white;
         }
-        
-        /* Contador del carrito */
-        .badge-violeta {
-            background-color: var(--violeta-principal) !important;
-        }
-        
-        /* Tarjetas de productos */
-        .card-producto {
-            border: 1px solid var(--violeta-claro);
-            border-radius: 12px;
-            overflow: hidden;
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
-        }
-        .card-producto:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 20px rgba(111, 66, 193, 0.1) !important;
+
+        /* Footer Comercial */
+        footer {
+            background-color: var(--dark-violet);
+            color: rgba(255, 255, 255, 0.7);
+            padding: 40px 0;
+            margin-top: 100px;
+            border-top: 4px solid var(--main-violet);
         }
     </style>
 </head>
-<body class="bg-light">
+<body>
 
-    <nav class="navbar navbar-expand-lg navbar-dark bg-violeta-nav mb-5 shadow-sm">
+    <nav class="navbar navbar-expand-lg navbar-dark navbar-premium sticky-top py-3">
         <div class="container">
-            <a class="navbar-brand fw-bold" href="#">👕 Remeras Shop</a>
-            <div class="d-flex gap-2">
-                <button class="btn btn-outline-light px-4 rounded-pill" id="btn-login" data-bs-toggle="modal" data-bs-target="#loginModal">
+            <a class="navbar-brand fw-extrabold fs-3 tracking-tight" href="#">
+                ⚡ <span class="text-white">URBAN</span><span style="color: var(--accent-glow);">VIBE</span>
+            </a>
+            <div class="d-flex gap-3">
+                <button class="btn btn-outline-light px-4 rounded-pill fw-semibold" id="btn-login" data-bs-toggle="modal" data-bs-target="#loginModal">
                     👤 Iniciar Sesión
                 </button>
-                <button class="btn btn-outline-light position-relative px-4 rounded-pill" id="btn-carrito" data-bs-toggle="modal" data-bs-target="#carritoModal">
-                    🛒 Carrito
-                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" id="carrito-contador">
-                        0
-                    </span>
+                <button class="btn btn-premium-violet position-relative px-4 rounded-pill" id="btn-carrito" data-bs-toggle="modal" data-bs-target="#carritoModal">
+                    🛒 Mi Carrito
+                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger shadow-lg" id="carrito-contador">0</span>
                 </button>
             </div>
         </div>
     </nav>
 
-    <div class="container">
-        <h1 class="text-center mb-5 fw-bold" style="color: var(--violeta-oscuro);">Nuestra Colección</h1>
-        
-        <div class="row row-cols-1 row-cols-md-3 g-4" id="contenedor-productos">
+    <header class="hero-section text-center">
+        <div class="container">
+            <span class="badge bg-white text-dark fw-bold px-3 py-2 rounded-pill mb-3 text-uppercase tracking-wider shadow-sm">Colección Invierno 2026</span>
+            <h1 class="display-4 fw-extrabold mb-3">Vesta con Actitud, Sentí el Estilo</h1>
+            <p class="lead text-white-50 max-w-2xl mx-auto mb-4">Remeras de algodón premium con estampados de alta durabilidad y calce perfecto diseñadas para vos.</p>
+            <a href="#catalogo" class="btn btn-light btn-lg rounded-pill px-5 fw-bold text-dark shadow">Explorar Catálogo 👇</a>
+        </div>
+    </header>
+
+    <main class="container my-5" id="catalogo">
+        <div class="d-flex justify-content-between align-items-center mb-5">
+            <div>
+                <h2 class="fw-bold m-0" style="color: var(--dark-violet);">Productos Destacados</h2>
+                <p class="text-muted m-0">Calidad superior garantizada en cada costura</p>
             </div>
-    </div>
-<div class="modal fade" id="loginModal" tabindex="-1" aria-labelledby="loginModalLabel" aria-hidden="true">
+        </div>
+        
+        <div class="row row-cols-1 row-cols-md-3 g-4" id="contenedor-productos"></div>
+    </main>
+
+    <div class="modal fade" id="loginModal" tabindex="-1" aria-labelledby="loginModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content border-0 shadow-lg" style="border-radius: 15px;">
-                <div class="modal-header bg-violeta-nav text-white" style="border-top-left-radius: 15px; border-top-right-radius: 15px;">
-                    <h5 class="modal-title fw-bold" id="loginModalLabel">🔐 Iniciar Sesión</h5>
+            <div class="modal-content border-0 shadow-lg" style="border-radius: 20px;">
+                <div class="modal-header text-white" style="background: var(--dark-violet); border-top-left-radius: 20px; border-top-right-radius: 20px;">
+                    <h5 class="modal-title fw-bold" id="loginModalLabel">🔐 Acceso Clientes</h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body p-4">
                     <div id="login-error" class="alert alert-danger d-none" role="alert"></div>
                     <form id="form-login">
                         <div class="mb-3">
-                            <label for="login-username" class="form-label fw-bold" style="color: var(--violeta-oscuro);">Usuario</label>
-                            <input type="text" class="form-control" id="login-username" required placeholder="Tu nombre de usuario">
+                            <label for="login-username" class="form-label fw-bold">Usuario</label>
+                            <input type="text" class="form-control py-2 rounded-3" id="login-username" required placeholder="Tu nombre de usuario">
                         </div>
-                        <div class="mb-3">
-                            <label for="login-password" class="form-label fw-bold" style="color: var(--violeta-oscuro);">Contraseña</label>
-                            <input type="password" class="form-control" id="login-password" required placeholder="••••••••">
+                        <div class="mb-4">
+                            <label for="login-password" class="form-label fw-bold">Contraseña</label>
+                            <input type="password" class="form-control py-2 rounded-3" id="login-password" required placeholder="••••••••">
                         </div>
-                        <button type="submit" class="btn btn-violeta w-100 py-2 rounded-pill fw-bold mt-2">Ingresar a la Tienda</button>
+                        <button type="submit" class="btn btn-premium-violet w-100 py-2.5 rounded-pill fw-bold">Ingresar a la Tienda</button>
                     </form>
                 </div>
             </div>
@@ -100,9 +169,9 @@
 
     <div class="modal fade" id="carritoModal" tabindex="-1" aria-labelledby="carritoModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-lg modal-dialog-centered">
-            <div class="modal-content border-0 shadow-lg" style="border-radius: 15px;">
-                <div class="modal-header bg-violeta-nav text-white" style="border-top-left-radius: 15px; border-top-right-radius: 15px;">
-                    <h5 class="modal-title fw-bold" id="carritoModalLabel">🛒 Tu Carrito de Compras</h5>
+            <div class="modal-content border-0 shadow-lg" style="border-radius: 20px;">
+                <div class="modal-header text-white" style="background: var(--dark-violet); border-top-left-radius: 20px; border-top-right-radius: 20px;">
+                    <h5 class="modal-title fw-bold" id="carritoModalLabel">🛒 Carrito de Compras</h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body p-4">
@@ -117,22 +186,27 @@
                                     <th class="text-end">Total</th>
                                 </tr>
                             </thead>
-                            <tbody id="tabla-carrito-cuerpo">
-                                </tbody>
+                            <tbody id="tabla-carrito-cuerpo"></tbody>
                         </table>
                     </div>
-                    
-                    <div class="d-flex justify-content-end mt-3 mb-2">
-                        <h4 class="fw-bold" style="color: var(--violeta-oscuro);">Total: <span id="carrito-total-pago">₲0</span></h4>
+                    <div class="d-flex justify-content-end mt-4">
+                        <h3 class="fw-bold" style="color: var(--dark-violet);">Total: <span id="carrito-total-pago" style="color: var(--main-violet);">₲0</span></h3>
                     </div>
                 </div>
-                <div class="modal-footer border-top-0 p-3">
-                    <button type="button" class="btn btn-secondary rounded-pill px-4" data-bs-dismiss="modal">Seguir Mirando</button>
-                    <button type="button" class="btn btn-violeta rounded-pill px-4 fw-bold" id="btn-checkout" onclick="procesarCompra()">Confirmar Compra 🚀</button>
+                <div class="modal-footer border-0 p-3">
+                    <button type="button" class="btn btn-light rounded-pill px-4 fw-bold" data-bs-dismiss="modal">Seguir Comprando</button>
+                    <button type="button" class="btn btn-premium-violet rounded-pill px-5 fw-bold" id="btn-checkout" onclick="procesarCompra()">Confirmar Pago 🚀</button>
                 </div>
             </div>
         </div>
     </div>
+
+    <footer class="text-center">
+        <div class="container">
+            <p class="fw-bold text-white mb-2">⚡ URBANVIBE E-COMMERCE</p>
+            <p class="small mb-0">© 2026 Todos los derechos reservados. Diseñado por Nilsa para Entrega Final Universitaria.</p>
+        </div>
+    </footer>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="app.js"></script>
