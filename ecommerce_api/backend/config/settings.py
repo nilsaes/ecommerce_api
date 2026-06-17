@@ -16,11 +16,12 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     'rest_framework',
-    'corsheaders',  # <--- AGREGÁ ESTA LÍNEA
+    'corsheaders', 
+    'drf_yasg', 
     'core',
-    'cart',  # <-- Agregamos nuestra nueva app acá
-    'users', # <-- La agregamos acá
-    'orders', # <-- Agregamos la app de órdenes acá
+    'cart',  
+    'users', 
+    'orders',
 ]
 
 MIDDLEWARE = [
