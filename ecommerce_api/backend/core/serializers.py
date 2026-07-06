@@ -4,13 +4,13 @@ from .models import Category, Product, ProductVariant
 class CategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = Category
-        fields = ['id', 'name', 'description']
+        fields = ['id', 'name', 'slug']
 
 
 class ProductVariantSerializer(serializers.ModelSerializer):
     class Meta:
         model = ProductVariant
-        fields = '__all__'  # Esto meterá automáticamente id, size, color, price, stock, sku, etc.
+        fields = '__all__' 
 
 
 class ProductSerializer(serializers.ModelSerializer):

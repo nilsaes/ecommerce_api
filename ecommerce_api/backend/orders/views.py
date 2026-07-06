@@ -12,12 +12,15 @@ class OrderViewSet(mixins.CreateModelMixin,
     ver la lista de sus órdenes y ver el detalle de una orden específica.
     """
     serializer_class = OrderSerializer
-    permission_classes = [IsAuthenticated] # Súper seguro: solo usuarios logueados
+    permission_classes = [IsAuthenticated] 
 
     def get_queryset(self):
-        # El cliente SOLO puede ver sus propias órdenes de compra
+    
+        if getattr(self, 'swagger_fake_view', False):
+            return Order.objects.none()
+            
         return Order.objects.filter(user=self.request.user)
 
     def perform_create(self, serializer):
-        # Al guardar la orden, le inyectamos de forma segura el usuario que disparó la petición
+        
         serializer.save(user=self.request.user)

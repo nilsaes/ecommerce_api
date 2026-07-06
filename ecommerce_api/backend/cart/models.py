@@ -20,7 +20,7 @@ class ProductVariant(models.Model):
     size = models.CharField(max_length=50)   # Ej: S, M, L, XL
     color = models.CharField(max_length=50)  # Ej: Violeta, Negro
     price = models.DecimalField(max_digits=12, decimal_places=2)
-    # Dejamos un stock alto por defecto para que no se agote en tus pruebas
+
     stock = models.IntegerField(default=9999) 
 
     def __str__(self):
@@ -47,8 +47,4 @@ class CartItem(models.Model):
     def __str__(self):
         return f"{self.quantity} x {self.product_variant} en el carrito"
 
-
-# ==========================================
-# 3. MODELOS PARA LAS ÓRDENES DE COMPRA
-# ==========================================
 

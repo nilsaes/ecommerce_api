@@ -29,7 +29,7 @@ class Order(models.Model):
 
     @property
     def total_price(self):
-        # Sumamos los subtotales de todos sus ítems
+    
         return sum(item.subtotal for item in self.items.all())
 
 
@@ -38,7 +38,7 @@ class OrderItem(models.Model):
     product_variant = models.ForeignKey(ProductVariant, on_delete=models.SET_NULL, null=True)
     quantity = models.PositiveIntegerField(default=1)
     
-    # Guardamos el precio histórico al momento de la compra
+
     price_at_purchase = models.DecimalField(max_digits=10, decimal_places=2)
 
     def __str__(self):
