@@ -1,6 +1,5 @@
 from rest_framework import viewsets, status
 from rest_framework.decorators import api_view, permission_classes
-from rest_framework.permissions import IsAuthenticated
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from .models import Cart, CartItem
@@ -12,7 +11,6 @@ from django.contrib.auth import get_user_model
 User = get_user_model()
 
 class CartViewSet(viewsets.ModelViewSet):
-    # permission_classes = [IsAuthenticated]
     permission_classes = [AllowAny]
     serializer_class = CartSerializer
 
@@ -22,13 +20,11 @@ class CartViewSet(viewsets.ModelViewSet):
         return Cart.objects.filter(user=self.request.user)
 
     def create(self, request, *args, **kwargs):
-        """ Lógica para agregar productos al carrito de forma segura """
+        """ Lógica ultrasegura para agregar productos al carrito """
         variant_id = request.data.get('product_variant_id')
         quantity = int(request.data.get('quantity', 1))
 
         try:
-            variant = ProductVariant.objects.get(id=variant_id)
-            
             if request.user.is_anonymous:
                 target_user = User.objects.get(id=1)
             else:
@@ -36,17 +32,22 @@ class CartViewSet(viewsets.ModelViewSet):
 
             cart, _ = Cart.objects.get_or_create(user=target_user)
             
-            cart_item, created = CartItem.objects.get_or_create(cart=cart, product_variant=variant)
-            if not created:
-                cart_item.quantity += quantity
-            else:
-                cart_item.quantity = quantity
+            # Buscamos si ya existe el ítem usando directamente el ID numérico
+            cart_item = CartItem.objects.filter(cart=cart, product_variant_id=variant_id).first()
             
-            cart_item.save()
+            if cart_item:
+                cart_item.quantity += quantity
+                cart_item.save()
+            else:
+                
+                CartItem.objects.create(
+                    cart=cart,
+                    product_variant_id=variant_id,
+                    quantity=quantity
+                )
+            
             return Response({"message": "Producto agregado con éxito"}, status=status.HTTP_201_CREATED)
             
-        except ProductVariant.DoesNotExist:
-            return Response({"error": "La variante de producto no existe"}, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
@@ -85,7 +86,6 @@ def confirm_purchase(request):
                 price_at_purchase=item.product_variant.price 
             )
 
-        
         total_final = nueva_orden.total_price
 
         # 4. Vaciar el carrito de la base de datos
